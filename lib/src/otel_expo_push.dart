@@ -1,15 +1,16 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_expo_push_suppression.dart';
 
 const _tracerName = 'dartastic_otel_libs_expo_push';
 
-Tracer _tracer() => OTel.tracerProvider().getTracer(_tracerName);
+APITracer _tracer() => OTelAPI.tracerProvider().getTracer(_tracerName);
 
 class ExpoPushResult {
+  /// Creates a result.
   const ExpoPushResult({
     this.ticketId,
     this.receiptId,
@@ -64,8 +65,13 @@ class ExpoPushResult {
   final int? statusCode;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class ExpoPushCallResult<T> {
+  /// Creates a call result.
   const ExpoPushCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final ExpoPushResult? result;
 }
@@ -89,62 +95,62 @@ Future<T> tracedExpoPush<T>({
   final span = _tracer().startSpan(
     'expo_push $operation',
     kind: SpanKind.client,
-    attributes: OTel.attributesFromMap(m),
+    attributes: OTelAPI.attributesFromMap(m),
   );
   try {
     final r = await invoke();
     if (r.result != null) {
       final extras = <Attribute<Object>>[];
       if (r.result!.ticketId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'expo_push.ticket.id',
           r.result!.ticketId!,
         ));
       }
       if (r.result!.receiptId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'expo_push.receipt.id',
           r.result!.receiptId!,
         ));
       }
       if (r.result!.recipientPlatform != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'expo_push.recipient.platform',
           r.result!.recipientPlatform!,
         ));
       }
       if (r.result!.channelId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'expo_push.channel.id',
           r.result!.channelId!,
         ));
       }
       if (r.result!.priority != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'expo_push.priority',
           r.result!.priority!,
         ));
       }
       if (r.result!.ttlSec != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'expo_push.ttl_sec',
           r.result!.ttlSec!,
         ));
       }
       if (r.result!.batchSize != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'expo_push.batch.size',
           r.result!.batchSize!,
         ));
       }
       if (r.result!.okCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'expo_push.batch.ok_count',
           r.result!.okCount!,
         ));
       }
       if (r.result!.errorCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'expo_push.batch.error_count',
           r.result!.errorCount!,
         ));
@@ -158,7 +164,7 @@ Future<T> tracedExpoPush<T>({
         }
       }
       if (r.result!.status != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'expo_push.status',
           r.result!.status!,
         ));
@@ -170,13 +176,13 @@ Future<T> tracedExpoPush<T>({
         }
       }
       if (r.result!.errorCode != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'expo_push.error.code',
           r.result!.errorCode!,
         ));
       }
       if (r.result!.statusCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'http.response.status_code',
           r.result!.statusCode!,
         ));
@@ -187,13 +193,13 @@ Future<T> tracedExpoPush<T>({
           );
         }
       }
-      if (extras.isNotEmpty) span.addAttributes(OTel.attributes(extras));
+      if (extras.isNotEmpty) span.addAttributes(OTelAPI.attributes(extras));
     }
     return r.value;
   } catch (e, st) {
-    span.addAttributes(OTel.attributes([
-      OTel.attributeString(
-        ErrorResource.errorType.key,
+    span.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
+        ErrorAttributes.errorType.key,
         e.runtimeType.toString(),
       ),
     ]));
